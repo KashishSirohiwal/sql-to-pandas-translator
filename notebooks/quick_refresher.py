@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd # type: ignore
 df = pd.read_csv('data/sales.csv', parse_dates=['date'])
 
 print("=== SELECT columns ===")

@@ -42,17 +42,48 @@ def extract_where(parsed):
             return condition
     return None
 
+def extract_order_by(parsed):
+    tokens = list(parsed.tokens)
+    for i, token in enumerate(tokens):
+        if token.ttype is Keyword and token.value.upper() == "ORDER BY":
+            # Find the next non-whitespace token
+            j = i + 1
+            while j < len(tokens) and tokens[j].is_whitespace:
+                j += 1
+
+            if j >= len(tokens):
+                return None  # No column found after ORDER BY
+
+            next_token = tokens[j]            
+            parts1 = str(next_token).split()
+            
+            column_name = parts1[0]
+            ascending_boolean = True # Default to ASC
+            if len(parts1) > 1 and parts1[1].upper() == "DESC":
+                ascending_boolean = False
+            return (column_name, ascending_boolean)
+    return None
+
 def sql_to_pandas_select(query):
     parsed = sqlparse.parse(query)[0]
     columns = extract_columns(parsed)
     where_clause = extract_where(parsed)
+    order_by_info = extract_order_by(parsed)
 
+    # Start with base dataframe
     if not columns or columns == ['*']:
         result_df = df.copy()
     else:
         result_df = df[columns]
+    
+    # Apply WHERE if present
     if where_clause:
         result_df = result_df.query(where_clause)
+
+    # Apply ORDER BY if present
+    if order_by_info:
+        column_name, ascending_boolean = order_by_info
+        result_df = result_df.sort_values(by=column_name, ascending=ascending_boolean)
 
     return result_df
 
@@ -63,3 +94,5 @@ if __name__ == "__main__":
     print(sql_to_pandas_select("SELECT product, amount FROM sales WHERE amount > 500"))
     print(sql_to_pandas_select("SELECT * FROM sales WHERE city == Delhi"))
     print(sql_to_pandas_select("SELECT * FROM sales WHERE category == Clothing"))
+    print(sql_to_pandas_select("SELECT * FROM sales ORDER BY amount DESC"))
+    print(sql_to_pandas_select("SELECT product, amount FROM sales WHERE amount > 500 ORDER BY amount ASC"))
