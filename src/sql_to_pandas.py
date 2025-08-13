@@ -31,7 +31,14 @@ def extract_where(parsed):
     """
     for token in parsed.tokens:
         if isinstance(token, Where):
-            return str(token).lstrip("WHERE").strip()
+            condition = str(token).lstrip("WHERE").strip()
+
+            # Split into parts: column, operator, value
+            parts = condition.split()
+            if len(parts) == 3 and parts[2].isalpha():
+                parts[2] = f'"{parts[2]}"'
+                condition = " ".join(parts)
+
             return condition
     return None
 
@@ -54,3 +61,5 @@ if __name__ == "__main__":
     print(sql_to_pandas_select("SELECT * FROM sales").head())
     print(sql_to_pandas_select("SELECT product, amount FROM sales").head())
     print(sql_to_pandas_select("SELECT product, amount FROM sales WHERE amount > 500"))
+    print(sql_to_pandas_select("SELECT * FROM sales WHERE city == Delhi"))
+    print(sql_to_pandas_select("SELECT * FROM sales WHERE category == Clothing"))
