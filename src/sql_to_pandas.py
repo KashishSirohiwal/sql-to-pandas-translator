@@ -7,6 +7,9 @@ from sqlparse.tokens import Keyword, DML
 df = pd.read_csv("data/sales.csv")
 
 def extract_columns(parsed):
+    """
+    Extracts selected columns from SQL query.
+    """
     columns = []
     select_seen = False
     for tok in parsed.tokens:
@@ -31,10 +34,14 @@ def extract_columns(parsed):
     return columns
 
 def extract_where(parsed):
+    """
+    Extracts WHERE condition from SQL query.
+    """
     for token in parsed.tokens:
         if isinstance(token, Where):
             condition = str(token).lstrip("WHERE").strip()
             parts = condition.split()
+            # Add quotes to string literals without quotes
             if len(parts) == 3 and parts[2].isalpha():
                 parts[2] = f'"{parts[2]}"'
                 condition = " ".join(parts)
@@ -42,6 +49,9 @@ def extract_where(parsed):
     return None
 
 def extract_order_by(parsed):
+    """
+    Extracts ORDER BY clause from SQL query.
+    """
     tokens = list(parsed.tokens)
     for i, token in enumerate(tokens):
         if token.ttype is Keyword and token.value.upper() == "ORDER BY":
@@ -60,6 +70,9 @@ def extract_order_by(parsed):
     return None
 
 def extract_group_by(parsed):
+    """
+    Extracts GROUP BY clause from SQL query.
+    """
     group_by_column = None
     tokens = list(parsed.tokens)
 
@@ -94,12 +107,30 @@ def extract_group_by(parsed):
                 agg_column = params[0].get_name()
     return (group_by_column, agg_column, agg_func)
 
+def extract_having(parsed):
+    """
+    Extracts HAVING condition from SQL query.
+    """
+    tokens = list(parsed.tokens)
+    for i, token in enumerate(tokens):
+        if token.ttype is Keyword and token.value.upper() == "HAVING":
+            # Join remaining tokens after HAVING
+            having_expr = ""
+            j = i + 1
+            while j < len(tokens):
+                having_expr += str(tokens[j])
+                j += 1
+            return having_expr.strip()
+    return None
+
+
 def sql_to_pandas_select(query):
     parsed = sqlparse.parse(query)[0]
     columns = extract_columns(parsed)
     where_clause = extract_where(parsed)
     order_by_info = extract_order_by(parsed)
     group_by_info = extract_group_by(parsed)
+    having_clause = extract_having(parsed)
 
     result_df = df.copy()
 
@@ -127,6 +158,13 @@ def sql_to_pandas_select(query):
             # Rename for SQL-like column name
             result_df.rename(columns={agg_column: f"{agg_func.upper()}({agg_column})"}, inplace=True)
 
+    # HAVING (applied after GROUP BY)
+    if having_clause:
+        # Replace SQL aggregate name with Pandas column name
+        for col in result_df.columns:
+            having_clause = having_clause.replace(col, f"`{col}`")
+        result_df = result_df.query(having_clause)
+
     # SELECT columns
     if columns and columns != ['*']:
         keep = [c for c in columns if c in result_df.columns]
@@ -141,6 +179,7 @@ def sql_to_pandas_select(query):
 
     return result_df
 
+
 if __name__ == "__main__":
     print(sql_to_pandas_select("SELECT * FROM sales").head())
     print(sql_to_pandas_select("SELECT product, amount FROM sales").head())
@@ -152,3 +191,5 @@ if __name__ == "__main__":
     print(sql_to_pandas_select("SELECT category, SUM(amount) FROM sales GROUP BY category"))
     print(sql_to_pandas_select("SELECT city, COUNT(order_id) FROM sales GROUP BY city ORDER BY COUNT(order_id) DESC"))
     print(sql_to_pandas_select("SELECT category, AVG(amount) FROM sales WHERE city == 'Delhi' GROUP BY category"))
+    print(sql_to_pandas_select("SELECT category, SUM(amount) FROM sales GROUP BY category HAVING SUM(amount) > 2000"))
+    print(sql_to_pandas_select("SELECT city, COUNT(order_id) FROM sales GROUP BY city HAVING COUNT(order_id) > 2"))
