@@ -134,6 +134,23 @@ def extract_having(parsed):
             return having_expr.strip()
     return None
 
+def extract_limit(parsed):
+    """
+    Extracts LIMIT clause from SQL query.
+    """
+    tokens = list(parsed.tokens)
+    for i, token in enumerate(tokens):
+        if token.ttype is Keyword and token.value.upper() == "LIMIT":
+            # Next token should be the limit number
+            j = i + 1
+            while j < len(tokens) and tokens[j].is_whitespace:
+                j += 1
+            if j < len(tokens):
+                try:
+                    return int(str(tokens[j]))
+                except ValueError:
+                    return None
+    return None
 
 def sql_to_pandas_select(query):
     parsed = sqlparse.parse(query)[0]
@@ -143,6 +160,7 @@ def sql_to_pandas_select(query):
     group_by_info = extract_group_by(parsed)
     having_clause = extract_having(parsed)
     distinct_flag = extract_distinct(parsed)
+    limit_value = extract_limit(parsed)
 
     result_df = df.copy()
 
@@ -193,6 +211,11 @@ def sql_to_pandas_select(query):
     if distinct_flag:
         result_df = result_df.drop_duplicates()
 
+    # LIMIT
+    if limit_value:
+        result_df = result_df.head(limit_value)
+
+
     return result_df
 
 
@@ -211,3 +234,5 @@ if __name__ == "__main__":
     print(sql_to_pandas_select("SELECT city, COUNT(order_id) FROM sales GROUP BY city HAVING COUNT(order_id) > 2"))
     print(sql_to_pandas_select("SELECT DISTINCT city FROM sales"))
     print(sql_to_pandas_select("SELECT DISTINCT category FROM sales WHERE amount > 1000"))
+    print(sql_to_pandas_select("SELECT * FROM sales LIMIT 5 ORDER BY amount DESC"))
+    print(sql_to_pandas_select("SELECT product, amount FROM sales WHERE amount > 100 LIMIT 3"))
