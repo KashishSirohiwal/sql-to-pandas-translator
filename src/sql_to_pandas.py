@@ -33,6 +33,17 @@ def extract_columns(parsed):
                 break
     return columns
 
+def extract_distinct(parsed):
+    for i, token in enumerate(parsed.tokens):
+        if token.ttype is DML and token.value.upper() == "SELECT":
+            # Check next non-whitespace token
+            j = i + 1
+            while j < len(parsed.tokens) and parsed.tokens[j].is_whitespace:
+                j += 1
+            if j < len(parsed.tokens) and parsed.tokens[j].ttype is Keyword and parsed.tokens[j].value.upper() == "DISTINCT":
+                return True
+    return False
+
 def extract_where(parsed):
     """
     Extracts WHERE condition from SQL query.
@@ -131,6 +142,7 @@ def sql_to_pandas_select(query):
     order_by_info = extract_order_by(parsed)
     group_by_info = extract_group_by(parsed)
     having_clause = extract_having(parsed)
+    distinct_flag = extract_distinct(parsed)
 
     result_df = df.copy()
 
@@ -177,6 +189,10 @@ def sql_to_pandas_select(query):
         if column_name in result_df.columns:
             result_df = result_df.sort_values(by=column_name, ascending=ascending_boolean)
 
+    # DISTINCT
+    if distinct_flag:
+        result_df = result_df.drop_duplicates()
+
     return result_df
 
 
@@ -193,3 +209,5 @@ if __name__ == "__main__":
     print(sql_to_pandas_select("SELECT category, AVG(amount) FROM sales WHERE city == 'Delhi' GROUP BY category"))
     print(sql_to_pandas_select("SELECT category, SUM(amount) FROM sales GROUP BY category HAVING SUM(amount) > 2000"))
     print(sql_to_pandas_select("SELECT city, COUNT(order_id) FROM sales GROUP BY city HAVING COUNT(order_id) > 2"))
+    print(sql_to_pandas_select("SELECT DISTINCT city FROM sales"))
+    print(sql_to_pandas_select("SELECT DISTINCT category FROM sales WHERE amount > 1000"))
