@@ -240,26 +240,5 @@ def sql_to_pandas_select(query):
 
     return result_df
 
-
 if __name__ == "__main__":
-    print(sql_to_pandas_select("SELECT * FROM sales").head())
-    print(sql_to_pandas_select("SELECT product, amount FROM sales").head())
-    print(sql_to_pandas_select("SELECT product, amount FROM sales WHERE amount > 500"))
-    print(sql_to_pandas_select("SELECT * FROM sales WHERE city == 'Delhi'"))
-    print(sql_to_pandas_select("SELECT * FROM sales WHERE category == 'Clothing'"))
-    print(sql_to_pandas_select("SELECT * FROM sales ORDER BY amount DESC"))
-    print(sql_to_pandas_select("SELECT product, amount FROM sales WHERE amount > 500 ORDER BY amount ASC"))
-    print(sql_to_pandas_select("SELECT category, SUM(amount) FROM sales GROUP BY category"))
-    print(sql_to_pandas_select("SELECT city, COUNT(order_id) FROM sales GROUP BY city ORDER BY COUNT(order_id) DESC"))
-    print(sql_to_pandas_select("SELECT category, AVG(amount) FROM sales WHERE city == 'Delhi' GROUP BY category"))
-    print(sql_to_pandas_select("SELECT category, SUM(amount) FROM sales GROUP BY category HAVING SUM(amount) > 2000"))
-    print(sql_to_pandas_select("SELECT city, COUNT(order_id) FROM sales GROUP BY city HAVING COUNT(order_id) > 2"))
-    print(sql_to_pandas_select("SELECT DISTINCT city FROM sales"))
-    print(sql_to_pandas_select("SELECT DISTINCT category FROM sales WHERE amount > 1000"))
-    print(sql_to_pandas_select("SELECT * FROM sales LIMIT 5 ORDER BY amount DESC"))
-    print(sql_to_pandas_select("SELECT product, amount FROM sales WHERE amount > 100 LIMIT 3"))
-    print(sql_to_pandas_select("SELECT * FROM sales WHERE city == 'Delhi' AND amount > 500"))
-    print(sql_to_pandas_select("SELECT * FROM sales WHERE category == 'Clothing' OR amount < 100 ORDER BY amount"))
-    print(sql_to_pandas_select("SELECT order_id, city, category, amount FROM sales WHERE city == 'Noida' AND category == 'Stationery'"))
-    print(sql_to_pandas_select("SELECT * FROM sales WHERE amount BETWEEN 100 AND 1000"))
-    print(sql_to_pandas_select("SELECT * FROM sales WHERE date BETWEEN '2023-02-01' AND '2023-03-31'"))
+    print("Run test_queries.py for query examples")
