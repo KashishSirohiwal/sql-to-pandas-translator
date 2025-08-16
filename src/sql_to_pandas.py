@@ -1,5 +1,5 @@
 import pandas as pd
-import sqlparse
+import sqlparse, re
 from sqlparse.sql import IdentifierList, Identifier, Where, Function
 from sqlparse.tokens import Keyword, DML
 
@@ -48,15 +48,34 @@ def extract_where(parsed):
     """
     Extracts WHERE condition from SQL query.
     """
+    date_pattern = re.compile(r"\d{4}-\d{2}-\d{2}")  # matches YYYY-MM-DD
+
     for token in parsed.tokens:
         if isinstance(token, Where):
             condition = str(token).lstrip("WHERE").strip()
+
             # Replace SQL operators with Pandas equivalents
             condition = condition.replace("AND", "&").replace("OR", "|")
 
+            # Handle BETWEEN
+            if " BETWEEN " in condition.upper():
+                parts = condition.split()
+                col = parts[0]
+                lower = parts[2]
+                upper = parts[4]
+                condition = f"({col} >= {lower}) & ({col} <= {upper})"
+
+                # If string values (not numeric), wrap in quotes
+                if lower.isalpha():
+                    lower = f'"{lower}"'
+                if upper.isalpha():
+                    upper = f'"{upper}"'
+
+                condition = f"({col} >= {lower}) & ({col} <= {upper})"
+
             parts = condition.split()
             # Add quotes to string literals without quotes
-            if len(parts) == 3 and parts[2].isalpha():
+            if len(parts) == 3 and (parts[2].isalpha() or date_pattern.match(parts[2])):
                 parts[2] = f'"{parts[2]}"'
                 condition = " ".join(parts)
             return condition
@@ -242,3 +261,5 @@ if __name__ == "__main__":
     print(sql_to_pandas_select("SELECT * FROM sales WHERE city == 'Delhi' AND amount > 500"))
     print(sql_to_pandas_select("SELECT * FROM sales WHERE category == 'Clothing' OR amount < 100 ORDER BY amount"))
     print(sql_to_pandas_select("SELECT order_id, city, category, amount FROM sales WHERE city == 'Noida' AND category == 'Stationery'"))
+    print(sql_to_pandas_select("SELECT * FROM sales WHERE amount BETWEEN 100 AND 1000"))
+    print(sql_to_pandas_select("SELECT * FROM sales WHERE date BETWEEN '2023-02-01' AND '2023-03-31'"))
