@@ -51,6 +51,9 @@ def extract_where(parsed):
     for token in parsed.tokens:
         if isinstance(token, Where):
             condition = str(token).lstrip("WHERE").strip()
+            # Replace SQL operators with Pandas equivalents
+            condition = condition.replace("AND", "&").replace("OR", "|")
+
             parts = condition.split()
             # Add quotes to string literals without quotes
             if len(parts) == 3 and parts[2].isalpha():
@@ -236,3 +239,6 @@ if __name__ == "__main__":
     print(sql_to_pandas_select("SELECT DISTINCT category FROM sales WHERE amount > 1000"))
     print(sql_to_pandas_select("SELECT * FROM sales LIMIT 5 ORDER BY amount DESC"))
     print(sql_to_pandas_select("SELECT product, amount FROM sales WHERE amount > 100 LIMIT 3"))
+    print(sql_to_pandas_select("SELECT * FROM sales WHERE city == 'Delhi' AND amount > 500"))
+    print(sql_to_pandas_select("SELECT * FROM sales WHERE category == 'Clothing' OR amount < 100 ORDER BY amount"))
+    print(sql_to_pandas_select("SELECT order_id, city, category, amount FROM sales WHERE city == 'Noida' AND category == 'Stationery'"))
