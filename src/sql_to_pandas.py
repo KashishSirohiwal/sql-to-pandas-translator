@@ -72,6 +72,14 @@ def extract_where(parsed):
                     upper = f'"{upper}"'
 
                 condition = f"({col} >= {lower}) & ({col} <= {upper})"
+            
+            # Handle IN clause
+            if " IN " in condition.upper():
+                col, values = condition.split("IN", 1)
+                col = col.strip()
+                values = values.strip().lstrip("(").rstrip(")")
+                values = [v.strip().strip("'").strip('"') for v in values.split(",")]
+                condition = f"{col}.isin({values})"
 
             parts = condition.split()
             # Add quotes to string literals without quotes
