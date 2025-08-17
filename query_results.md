@@ -298,3 +298,41 @@ SELECT * FROM sales WHERE date BETWEEN '2023-02-01' AND '2023-03-31'
 
 ---
 
+### SQL Query
+```sql
+SELECT * FROM sales WHERE city IN ('Delhi', 'Noida')
+```
+**Expected:** Orders from Delhi or Noida
+
+**Output:**
+
+|   order_id | date       | product   | category   |   amount | city   |   customer_id |
+|-----------:|:-----------|:----------|:-----------|---------:|:-------|--------------:|
+|          1 | 2023-01-03 | Shampoo   | Toiletries |      250 | Delhi  |           101 |
+|          2 | 2023-01-05 | Soap      | Toiletries |       40 | Delhi  |           102 |
+|          4 | 2023-02-01 | Jeans     | Clothing   |     1599 | Noida  |           104 |
+|          5 | 2023-02-10 | Perfume   | Toiletries |     1200 | Delhi  |           105 |
+|          6 | 2023-03-12 | Notebook  | Stationery |       60 | Noida  |           106 |
+|          8 | 2023-04-05 | T-shirt   | Clothing   |      699 | Delhi  |           108 |
+|          9 | 2023-04-08 | Shampoo   | Toiletries |      300 | Noida  |           109 |
+
+---
+
+### SQL Query
+```sql
+SELECT product, amount FROM sales WHERE category IN ('Clothing', 'Stationery')
+```
+**Expected:** Products in Clothing or Stationery categories
+
+**Output:**
+
+| product   |   amount |
+|:----------|---------:|
+| T-shirt   |      799 |
+| Jeans     |     1599 |
+| Notebook  |       60 |
+| Pen       |       15 |
+| T-shirt   |      699 |
+
+---
+
