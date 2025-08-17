@@ -63,3 +63,7 @@ if __name__ == "__main__":
     # BETWEEN
     run_query("SELECT * FROM sales WHERE amount BETWEEN 100 AND 1000", "Orders with amount between 100 and 1000")
     run_query("SELECT * FROM sales WHERE date BETWEEN '2023-02-01' AND '2023-03-31'", "Orders placed between Feb 1 and Mar 31, 2023")
+
+    # IN
+    run_query("SELECT * FROM sales WHERE city IN ('Delhi', 'Noida')", "Orders from Delhi or Noida")
+    run_query("SELECT product, amount FROM sales WHERE category IN ('Clothing', 'Stationery')", "Products in Clothing or Stationery categories")
