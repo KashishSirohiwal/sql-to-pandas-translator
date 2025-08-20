@@ -83,3 +83,78 @@ df = sql_to_pandas_select(<br>
 print(df)<br>
 
 ---
+
+## Supported SQL Syntax
+
+```-- Select all ```<br>
+SELECT * FROM sales;
+
+```-- Select columns ```<br>
+SELECT product, amount FROM sales;
+
+```-- WHERE with logical conditions ```<br>
+SELECT * FROM sales WHERE city == 'Delhi' AND amount > 500;
+
+```-- BETWEEN (numeric & date ranges)``` <br>
+SELECT * FROM sales WHERE amount BETWEEN 100 AND 1000; <br>
+SELECT * FROM sales WHERE date BETWEEN '2023-02-01' AND '2023-03-31';
+
+```-- IN ``` <br>
+SELECT * FROM sales WHERE city IN ('Delhi','Noida'); <br>
+SELECT product, amount FROM sales WHERE category IN ('Clothing','Stationery');
+
+```-- ORDER BY ``` <br>
+SELECT * FROM sales ORDER BY amount DESC;
+
+```-- DISTINCT ```<br>
+SELECT DISTINCT city FROM sales;
+
+```-- GROUP BY + HAVING``` <br>
+SELECT category, SUM(amount) FROM sales GROUP BY category; <br>
+SELECT city, COUNT(order_id) FROM sales GROUP BY city HAVING COUNT(order_id) > 2;
+
+```-- LIMIT ```<br>
+SELECT * FROM sales LIMIT 5;
+
+---
+## Sample Outputs
+
+Results are auto-exported to query_results.md <br>
+Here’s a preview:<br>
+<br>
+**SELECT category, SUM(amount) FROM sales GROUP BY category**
+```
+category	     SUM(amount)
+Clothing	       3097
+Stationery	   	    75 
+Toiletries    	   2890
+```
+
+---
+## Limitations
+
+This is a learning project, so some SQL features are not yet supported: <br>
+
+-- JOINs & subqueries <br>
+-- Aliases (AS) <br>
+-- LIKE / regex filters <br>
+-- Multiple aggregates in a single query <br>
+
+---
+## Future Improvements
+
+-- JOIN support across multiple CSVs <br>
+-- Aliases (AS total_sales) <br>
+-- LIKE / pattern matching <br>
+-- Support multiple aggregates per query <br>
+-- Enhanced error handling <br>
+
+---
+## Credits
+
+Developed by Kashish <br>
+Made for Data Science + SQL + Pandas practice. <br>
+
+📜 Licensed under MIT <br>
+
+---
